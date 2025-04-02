@@ -1,0 +1,3 @@
+No se pordria implementar mediante un programa por problemas de seguridad??
+ls si, puedo llamar al sistema, o también execl("/bin/ls", "/bin/ls", NULL); 
+No es posible que un programa le cambie las variables de entorno a otro.

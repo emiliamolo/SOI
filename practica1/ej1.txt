@@ -1,0 +1,2 @@
+Imprime el pid del proceso de la terminal bash.
+Esto lo podemos comprobar corriendo luego `ps` y ver que coincide el número antes mostrado, además que múltiples ejecuciones no modifican el número en la misma terminal (sino cada proceso nuevo de echo imprimiría un nuevo pid).

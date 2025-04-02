@@ -1,0 +1,17 @@
+total 88
+drwxrwxr-x 4 alumno alumno  4096 mar 31 16:47 .
+drwxrwxr-x 4 alumno alumno  4096 mar 31 16:43 ..
+-rw-rw-r-- 1 alumno alumno   280 mar 25 15:31 ej1.txt
+drwxrwxr-x 2 alumno alumno  4096 mar 31 12:53 ej2
+drwxrwxr-x 2 alumno alumno  4096 mar 31 12:53 ej3
+-rw-rw-r-- 1 alumno alumno   460 mar 27 21:10 ej4.md
+-rw-rw-r-- 1 alumno alumno   439 mar 27 21:10 ej5.md
+-rw-rw-r-- 1 alumno alumno  2281 mar 31 13:00 ej6.md
+-rwxrwxr-x 1 alumno alumno 16512 mar 31 16:47 ej7
+-rwxrwxr-x 1 alumno alumno 16352 mar 31 16:16 ej7ab
+-rw-rw-r-- 1 alumno alumno   880 mar 31 16:16 ej7ab.c
+-rw-rw-r-- 1 alumno alumno  1269 mar 31 16:28 ej7c.c
+-rw-rw-r-- 1 alumno alumno  2013 mar 31 16:47 ej7d.c
+-rw-rw-r-- 1 alumno alumno  1461 mar 29 14:14 ej8.c
+-rw-rw-r-- 1 alumno alumno   580 mar 29 12:53 ej9.c
+-rw-r--r-- 1 alumno alumno     0 mar 31 16:47 hola.txt
