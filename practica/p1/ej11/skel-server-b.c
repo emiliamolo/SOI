@@ -11,6 +11,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h> /* For mode constants */
 #include <fcntl.h> /* For O_* constants */
+#include <signal.h>
 
 /*
  * Para probar, usar netcat. Ej:
@@ -22,6 +23,11 @@
  *      1
  *      CHAU
  */
+
+
+#define SHM_NAME "/mi_memoria_compartida"
+/* la memoria compartida creada con shm_open se representa como un archivo
+ especial en el directorio /dev/shm/*/
 
 void quit(char *s)
 {
@@ -71,36 +77,40 @@ void handle_conn(int csock, int *shared_u)
 		}
 
 		if (!strcmp(buf, "NUEVO")) {
-			char reply[20];
+			char reply[200];
 			sprintf(reply, "%d\n", *shared_u);
 			(*shared_u)++;
-			write(csock, reply, strlen(reply));
+			if (write(csock, reply, strlen(reply)) < 0) {
+                perror("Error en write");
+            }
 		} else if (!strcmp(buf, "CHAU")) {
 			close(csock);
-			return;
+			exit(0);
 		}
 	}
 }
-
 void wait_for_clients(int lsock, int *shared_u)
 {
 	int csock;
+	while(1){
+		/* Esperamos una conexión, no nos interesa de donde viene */
+		csock = accept(lsock, NULL, NULL);
+		if (csock < 0)
+			quit("accept");
 
-	/* Esperamos una conexión, no nos interesa de donde viene */
-	csock = accept(lsock, NULL, NULL);
-	if (csock < 0)
-		quit("accept");
-
-    int pid = fork();
-    if (pid == 0){
-        /* Atendemos al cliente */
-        handle_conn(csock, shared_u);
-        exit(0);
-    }
-    else{
-        /* Volvemos a esperar conexiones */
-	    wait_for_clients(lsock, shared_u);
-    }
+		int pid = fork();
+		if (pid == 0){
+			/* Atendemos al cliente */
+			handle_conn(csock, shared_u);
+			munmap(shared_u, sizeof(int));
+			close(csock);
+			exit(0);
+		}
+		else{
+			/* Volvemos a esperar conexiones */
+			close(csock);
+		}
+	}
 }
 
 /* Crea un socket de escucha en puerto 4040 TCP */
@@ -139,8 +149,16 @@ int mk_lsock()
 
 int main()
 {
-	int fd = shm_open("U", O_RDWR, 0666); // TERMINAR!!!
-	int *shared_u = mmap(&U, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	int fd = shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666); // Crear o abrir la memoria compartida
+	ftruncate(fd, sizeof(int)); // no deberia hacer falta si borras bien la memoria compartida con shm_unlink, pero no lo estoy haciendo
+	int *shared_u = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	close(fd);
+	*shared_u = 0; 
+	if (shared_u == MAP_FAILED) {
+    	perror("Error en mmap");
+    	exit(1);
+	}
+	
 	int lsock;
 	lsock = mk_lsock();
 	wait_for_clients(lsock, shared_u);
