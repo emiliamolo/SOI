@@ -1,0 +1,1 @@
+Con `encontrado = encontrado || (A[i] == 42)` no se ejecuta la segunda condición si encontrado == true ya. En el otro caso, en cambio, se ejecuta en el if cada vez. Eso si, la asignación de `encontrado` a sí mismo se realiza sólo cuando vale la condición en el primer caso, y en el segundo se ejecuta siempre.
