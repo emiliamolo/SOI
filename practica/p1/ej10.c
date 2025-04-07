@@ -6,7 +6,7 @@
 
 void handle(int sig){
     printf("Hola\n");   
-    exit(0) ;
+    exit(0);
 }
 
 int main(){
