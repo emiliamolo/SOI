@@ -26,3 +26,15 @@ int main() {
 
     return 0;
 }
+
+/*
+Cuando compilamos con optimizaciones, directamente se suma NUM_VISITANTES a visitas, no se ejecuta el for.
+    molinete:
+    .LFB36:
+        .cfi_startproc
+        endbr64
+        addl	$100000, visitas(%rip)
+        xorl	%eax, %eax
+        ret
+        .cfi_endproc
+*/

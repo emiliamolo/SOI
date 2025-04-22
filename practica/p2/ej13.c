@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define NUM_VISITANTES 2000000
+#define NUM_VISITANTES 20000000
 
 int visitas = 0;
 int flag[2] = {0,0}; // i tiene intención de ejecutarse
@@ -50,3 +50,11 @@ int main() {
 
     return 0;
 }
+/*
+El mfence garantiza que todas las instrucciones anteriores sean visibles antes que las posteriores al mfence.
+Pero si está antes que la asignación del turno, no se asegura el orden necesario entre la asignación de la bandera
+y del turno. 
+Por ejemplo: si  molinete1 ejecuta flag[0] = 1, molinete2 puede leer turno=2 y entrar a la 
+región crítica pensando que tiene prioridad. A la vez, molinete1 puede, de la misma forma, leer turno=1 y también entrar 
+a la región crítica. 
+*/

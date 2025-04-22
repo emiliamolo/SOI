@@ -14,7 +14,7 @@ void* molinete1(void *_) {
         flag[0] = 1;
         turno = 2;
         asm("mfence");
-        while(flag[1] && turno == 2){}
+        while(flag[1] && turno == 2){} // espera activa
         visitas++;
         //printf("[M1] Visita %d\n",visitas);
         flag[0] = 0;
@@ -27,7 +27,7 @@ void* molinete2(void *_) {
         flag[1] = 1;
         turno = 1;
         asm("mfence");
-        while(flag[0] && turno == 1){}
+        while(flag[0] && turno == 1){} // espera activa
         visitas++;
         //printf("[M2] Visita %d\n",visitas);
         flag[1] = 0;
