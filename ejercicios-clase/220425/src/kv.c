@@ -34,7 +34,7 @@ long kv_keys()
 	for (i = 0; i < mutexesSZ; i++) {
 		pthread_mutex_lock(&mutexes[i]);
 
-		for (j = i; j < TableSZ; j += i) {
+		for (j = i; j < TableSZ; j += mutexesSZ) {
 			struct list *p;
 			list_for_each(p, &Table[j].vals)
 				r++;
@@ -117,8 +117,9 @@ static int kv_evict1()
 		bin = kv->bin;
 
 		/* Intentar tomar lock, si falla seguimos */
-		if (pthread_mutex_trylock(&mutexes[bin % mutexesSZ]))
+		if (pthread_mutex_trylock(&mutexes[bin % mutexesSZ])){
 			continue;
+		}
 
 		/*
 		 * Si está tomado por alguien (aparte de la misma
@@ -300,12 +301,14 @@ int kv_add(int klen, char *k, int vlen, char *v)
 	}
 
 	list_add_head(&Table[idx].vals, &new->list);
-	pthread_mutex_unlock(&mutexes[idx % mutexesSZ]);
+	//pthread_mutex_unlock(&mutexes[idx % mutexesSZ]); // antes el mutex estaba aca y no andaba!
 
 	pthread_spin_lock(&spinlockLRU);
 	list_add_head(&LRU, &new->lru);
 	pthread_spin_unlock(&spinlockLRU);
-
+	pthread_mutex_unlock(&mutexes[idx % mutexesSZ]); // ahora aca si anda, si no otro hilo lo puede cambiar cuando aun 
+													// no esta correctamente enlazado en ambas listas.
+	
 	return 0;
 }
 

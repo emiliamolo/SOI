@@ -1,5 +1,5 @@
 #include "mutex_recursivo.h"
-#include <pthread.h>
+
 
 int mutex_recursivo_init(mutex_recursivo_t *mr){
     mr->cantidad = 0;

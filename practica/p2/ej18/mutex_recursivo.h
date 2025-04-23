@@ -2,6 +2,11 @@
 #define MUTEX_RECURSIVO_H
 
 #include <pthread.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+#include <sys/types.h>
+
+#define gettid() syscall(SYS_gettid)
 
 typedef struct{
     pthread_mutex_t mutex;
