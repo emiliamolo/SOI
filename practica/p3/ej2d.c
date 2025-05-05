@@ -49,7 +49,7 @@ void * filosofo(void *arg)
     pensar(i);
   }
 }
-int main() // TODO: Ver por qué es livelock, ver si falla, etc
+int main()
 {
   pthread_t filo[N_FILOSOFOS];
   int i;
@@ -62,3 +62,23 @@ int main() // TODO: Ver por qué es livelock, ver si falla, etc
   pthread_join(filo[0], NULL);
   return 0;
 }
+
+/*
+Puede no funcionar porque se produce un livelock. En efecto, si todos los filósofos toman su
+tenedor derecho al mismo tiempo tal que observen que no pueden tomar su tenedor izquierdo,
+soltarían el derecho esperando una cantidad de tiempo fija. Si el orden en el cual termina
+cada uno su espera es el mismo (con mismo tiempo de espera c/u) entonces todos volverían
+a tomar su tenedor derecho impidiendo que alguno tome su izquierdo, repitiéndose el problema.
+En otras palabras, si todos toman su tenedor derecho al mismo tiempo, y esperan el mismo tiempo
+con la intención de que otro tome el tenedor antes, puede suceder un livelock, donde los 
+filósofos NO pueden comer porque todos están intentando dejar que otro coma al soltar su tenedor.
+
+En la práctica, al menos con un programa, esto es poco probable que se prolongue de forma 
+indefinida, ya que sería poco común que el orden en que los threads resumen su ejecución, incluso
+con el mismo tiempo transcurrido, sea el mismo cada vez. Es por esto que vemos que el programa
+eventualmente funciona y todos pueden comer. Además, usando variables de condición se le 
+avisa a otro filósofo que uno de los tenedores se encuentra disponible para agarrar, lo cual
+posiblemente evita aún más que se produzca un livelock.
+Además, claramente no es eficiente porque los filósofos esperan un tiempo de forma no coordinada
+para seguir comiendo, generando mayores demoras por la competencia sobre los tenedores.
+*/

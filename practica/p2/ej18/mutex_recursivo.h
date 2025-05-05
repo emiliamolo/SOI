@@ -14,7 +14,7 @@ typedef struct{
     int propietario;
 }mutex_recursivo_t;
 
-int mutex_recursivo_init(mutex_recursivo_t *mr);
+void mutex_recursivo_init(mutex_recursivo_t *mr);
 int mutex_recursivo_lock(mutex_recursivo_t *mr);
 int mutex_recursivo_unlock(mutex_recursivo_t *mr);
 int mutex_recursivo_destroy(mutex_recursivo_t *mr);

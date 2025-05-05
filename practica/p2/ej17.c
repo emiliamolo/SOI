@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define NUM_VISITANTES 20000
+#define NUM_VISITANTES 2000000
 #define N 5
 
 volatile int numeros[N];
@@ -12,7 +12,9 @@ volatile int visitas = 0;
 int max(int n, int numeros[n]){
     int res = numeros[0];
     for(int i=1; i < n; i++){
-        if (numeros[i] > res) res = numeros[i];
+        if (numeros[i] > res) {
+            res = numeros[i];
+        }
     }
     return res;
 }
@@ -21,7 +23,6 @@ void lock(int i){
     numeros[i] = 1 + max(N, numeros);
     eligiendo[i] = 0;
     for(int j=0;j < N; j++){
-        if(j == i) continue;
         while (eligiendo[j]) { ;/* busy waiting */ } /* Si el hilo j está calculando su número, espera a que termine */    
         
         /* Si el hilo j tiene más prioridad, espera a que ponga su número a cero */    

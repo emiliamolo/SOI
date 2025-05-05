@@ -1,7 +1,7 @@
 #include "mutex_recursivo.h"
 
 
-int mutex_recursivo_init(mutex_recursivo_t *mr){
+void mutex_recursivo_init(mutex_recursivo_t *mr){
     mr->cantidad = 0;
     pthread_mutex_init(&mr->mutex, NULL);
     mr->propietario = gettid();
