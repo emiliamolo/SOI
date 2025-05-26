@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include "timing.h"
 #define M 500000000
+
+int a[M];
+
 // Función para combinar dos mitades ordenadas del array
 void merge(int arr[], int izquierda, int medio, int derecha) {
     int i, j, k;
@@ -10,19 +13,14 @@ void merge(int arr[], int izquierda, int medio, int derecha) {
     int n2 = derecha - medio;
 
     // Crear arreglos temporales
-    int L[n1], R[n2];
+    int *L = malloc(sizeof(int) * n1);
+    int *R = malloc(sizeof(int) * n2);
 
     // Copiar datos a arreglos temporales L[] y R[]
-    #pragma omp parallel
-    {
-        #pragma omp parallel for
-        for (i = 0; i < n1; i++)
-            L[i] = arr[izquierda + i];
-        #pragma omp parallel for
-        for (j = 0; j < n2; j++)
-            R[j] = arr[medio + 1 + j];
-    }
-    
+    for (i = 0; i < n1; i++)
+        L[i] = arr[izquierda + i];
+    for (j = 0; j < n2; j++)
+        R[j] = arr[medio + 1 + j];
 
     // Combinar los arreglos temporales de vuelta en arr[]
     i = 0; // Índice inicial del primer subarreglo
@@ -52,6 +50,9 @@ void merge(int arr[], int izquierda, int medio, int derecha) {
         j++;
         k++;
     }
+
+    free(L);
+    free(R);
 }
 
 // Función principal de Merge Sort
@@ -60,9 +61,10 @@ void mergeSort(int arr[], int izquierda, int derecha) {
         int medio = izquierda + (derecha - izquierda) / 2;
 
         // Ordenar la primera y la segunda mitad
-        #pragma omp task
+        int dif = medio-izquierda;
+        #pragma omp task if (dif>400)
         mergeSort(arr, izquierda, medio);
-        #pragma omp task
+        #pragma omp task if (dif>400)
         mergeSort(arr, medio + 1, derecha);
 
         #pragma omp taskwait
@@ -89,7 +91,6 @@ void run(int a[], int N){
 
 // Ejemplo de uso
 int main() {
-    int a[M];
     for(int i=0; i<M;i++){
         a[i] = rand()%1000;
     }
