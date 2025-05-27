@@ -14,7 +14,7 @@ void main(int argc, char **argv) {
     int rem1 = my_id*2, rem2 = my_id*2+1;
     fflush(stdout);
     if (rem1 <= num_procs) 
-        MPI_Recv(&s1, 1, MPI_INT, rem1-1, rem1, MPI_COMM_WORLD, NULL); // TODO: Los mensajes esperan?
+        MPI_Recv(&s1, 1, MPI_INT, rem1-1, rem1, MPI_COMM_WORLD, NULL); 
     if (rem2 <= num_procs)
         MPI_Recv(&s2, 1, MPI_INT, rem2-1, rem2, MPI_COMM_WORLD, NULL);
     
