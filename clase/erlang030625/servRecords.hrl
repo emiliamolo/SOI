@@ -1,0 +1,4 @@
+-record(nuevoId, {nombre, cid}).
+-record(buscarId, {nid, cid}).
+-record(verLista, {cid}).
+-record(finalizar, {cid}).

@@ -4,7 +4,7 @@
 
 #define N 7
 
-int main(int argc, char **argv)
+int multiplicar(int argc, char **argv)
 {
     int i, j, id, nprocs;
     
@@ -76,5 +76,11 @@ int main(int argc, char **argv)
 
     MPI_Finalize();
 
+    return 0;
+}
+
+int main(int argc, char **argv){
+    float tim;
+    TIME_void(multiplicar(int argc, char **argv), &tim);
     return 0;
 }
