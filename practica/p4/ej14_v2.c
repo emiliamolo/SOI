@@ -11,7 +11,19 @@ int main(int argc, char **argv)
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &id);
     MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    int filas = N/nprocs; // el numero de procesos debe dividia a N, si no no va a andar
+    
+    int bloque = N/nprocs, resto = N%nprocs;
+    int sendcounts[nprocs];
+    int desplazamientos[nprocs];
+    int offset = 0;
+    for(int i=0; i < nprocs; i++){
+        sendcounts[i] = (bloque + (i<resto)) * N;
+        desplazamientos[i] = offset;
+        offset += sendcounts[i];
+    }
+    int filas = sendcounts[id]/N;
+
+
     int localA[filas][N], localX[N];
     int v[N];
     if (!id){
@@ -23,8 +35,16 @@ int main(int argc, char **argv)
             }
             A[i][i] = 1;
         }
-        
-        MPI_Scatter(A, filas * N, MPI_INT, localA, filas * N, MPI_INT, 0, MPI_COMM_WORLD);
+        int recvcounts[nprocs];
+        int displs_x[nprocs]; 
+        offset = 0;
+        for (int i = 0; i < nprocs; i++) {
+            recvcounts[i] = sendcounts[i] / N; // cada fila produce un solo entero en x
+            displs_x[i] = offset;
+            offset += recvcounts[i];
+        }
+
+        MPI_Scatterv(A, sendcounts, desplazamientos, MPI_INT, localA, sendcounts[id], MPI_INT, 0, MPI_COMM_WORLD);
         MPI_Bcast(v, N, MPI_INT, 0, MPI_COMM_WORLD); // envio v a todos
         
         // el proceso root tambien calcula una parte
@@ -35,14 +55,14 @@ int main(int argc, char **argv)
         }
 
 
-        MPI_Gather(localX, filas, MPI_INT, x, filas, MPI_INT, 0,MPI_COMM_WORLD);
+        MPI_Gatherv(localX, filas, MPI_INT, x, recvcounts, displs_x, MPI_INT, 0, MPI_COMM_WORLD);
         for(int i=0;i<N;i++){ 
             printf("x[%d] = %d\n", i, x[i]);
         }
     }
      else {
         //  scatter para recibir lo que envie con scatter en root
-        MPI_Scatter(NULL, 0, MPI_INT, localA, filas * N, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Scatterv(NULL, sendcounts, desplazamientos, MPI_INT, localA, sendcounts[id], MPI_INT, 0, MPI_COMM_WORLD);
         // bcast para recibir lo que envie con bcast en root
         MPI_Bcast(v, N, MPI_INT, 0, MPI_COMM_WORLD);
         for (i=0;i<filas;i++) {
@@ -51,7 +71,7 @@ int main(int argc, char **argv)
                 localX[i] += localA[i][j]*v[j];
         }
         // hago gather para enviar al proceso 0/root
-        MPI_Gather(localX, filas, MPI_INT, NULL, 0, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Gatherv(localX, filas, MPI_INT, NULL, NULL, NULL, MPI_INT, 0, MPI_COMM_WORLD);
     }
 
     MPI_Finalize();
