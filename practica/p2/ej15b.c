@@ -10,6 +10,7 @@
 
 #include <pthread.h>
 #include <sys/epoll.h>
+#include <fcntl.h>
 
 /*
  * Para probar, usar netcat. Ej:
@@ -56,38 +57,34 @@ int fd_readline(int fd, char *buf)
 	return i;
 }
 
-void handle_conn(int* csock_ptr)
+void handle_conn(int csock)
 {
 	char buf[200];
 	int rc;
-    int csock = *csock_ptr;
 
-	while (1) {
-		/* Atendemos pedidos, uno por linea */
-		rc = fd_readline(csock, buf);
-		if (rc < 0)
-			quit("read... raro");
+	/* Atendemos pedidos, uno por linea */
+	rc = fd_readline(csock, buf);
+	if (rc < 0)
+		quit("read... raro");
 
-		if (rc == 0) {
-			/* linea vacia, se cerró la conexión */
-			close(csock);
-			return;
-		}
-
-		if (!strcmp(buf, "NUEVO")) {
-			char reply[20];
-
-            pthread_mutex_lock(&u_mtx);
-			sprintf(reply, "%d\n", U);
-			U++;
-            pthread_mutex_unlock(&u_mtx);
-            
-			write(csock, reply, strlen(reply));
-		} else if (!strcmp(buf, "CHAU")) {
-			close(csock);
-			return;
-		}
+	if (rc == 0) {
+		/* linea vacia, se cerró la conexión */
+		close(csock);
+		return;
 	}
+
+	if (!strcmp(buf, "NUEVO")) {
+		char reply[20];
+
+		pthread_mutex_lock(&u_mtx);
+		sprintf(reply, "%d\n", U);
+		U++;
+		pthread_mutex_unlock(&u_mtx);
+		
+		write(csock, reply, strlen(reply));
+	} else if (!strcmp(buf, "CHAU"))
+		close(csock);
+	// TODO: Terminar (bien) epoll. Agregar ONESHOT, o capaz ver de hacer nonblocking...???
 }
 
 void epoll_wait_for_clients(void **args) {
@@ -104,8 +101,6 @@ void epoll_wait_for_clients(void **args) {
 				int csock = accept(lsock, NULL, NULL);
 				if (csock == -1)
 					quit("accept");
-
-				setnonblocking(csock);
 				
 				struct epoll_event ev;
 				ev.events = EPOLLIN | EPOLLET;
@@ -138,6 +133,9 @@ void wait_for_clients(int lsock)
 	void *args[] = {&epollfd, &lsock};
 	for (int i = 0; i < THREAD_POOL_N; i++) 
 		pthread_create(&thread_pool[i], NULL, (void* (*)(void*))epoll_wait_for_clients, args);
+
+	for (int i = 0; i < THREAD_POOL_N; i++) 
+		pthread_join(thread_pool[i], NULL);
 }
 
 /* Crea un socket de escucha en puerto 4040 TCP */
@@ -158,7 +156,7 @@ int mk_lsock()
 		quit("setsockopt");
 
 	sa.sin_family = AF_INET;
-	sa.sin_port = htons(4040);
+	sa.sin_port = htons(8000);
 	sa.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	/* Bindear al puerto 4040 TCP, en todas las direcciones disponibles */
