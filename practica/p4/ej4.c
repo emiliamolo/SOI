@@ -24,10 +24,3 @@ int main(){
 
     return 0;
 }
-
-/*
-Claramente
-- de forma paralela tarda: 0.23130s
-- de forma secuencial: 0.9813s
-
-*/

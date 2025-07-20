@@ -28,13 +28,14 @@ void miqsort(int a[], int N)
     if (N < 2)
         return;
     int p = particionar(a, N);
-    #pragma omp task
+    #pragma omp task if (p > 2000)
     {
         miqsort(a, p);
     }
-    #pragma omp task
+    int p2 = N-p-1;
+    #pragma omp task if (p2 > 2000)
     {
-        miqsort(a + p + 1, N - p - 1);
+        miqsort(a + p + 1, p2);
     }
 }
 
@@ -66,7 +67,11 @@ int main(){
 Funciona bastante más rápido. Con N = 1e6:
 Secuencial: 2.01875s
 OpenMP: 1.62609s
-OpenMP Tasks: 0.51934s
-Es decir, un 70% más rápido que OpenMP con sections.
-Probablemente, esta diferencia se presenta en que utilizar sections sólo asigna las tareas a los primeros dos threads para la llamada recursiva del quicksort, mientras que con tasks se pueden distribuir las tareas entre todos los threads.
+OpenMP Tasks: 0.51934s (0.43517s otra PC)
+OpenMP Tasks (v2): 0.11229s (otra PC)
+
+Como una optimización adicional, se puede usar la cláusula if para evitar crear threads en particionar fragmentos
+pequeños del array, donde el costo de crear tasks es más costoso que lo ahorrado en paralelizar.
+Observamos así respecto a sin esta optimización, un speedup de alrededor de 3.87454 aunque una eficiencia de 0.32295
+(12 posibles threads).
 */
